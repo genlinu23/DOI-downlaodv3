@@ -5,13 +5,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import qVersion
-
 DEFAULT_ENCODING = 'utf-8'
 SYSTEM_LANGUAGE = locale.getdefaultlocale()[0]
 
 PYTHON_VERSION = '.'.join(str(v) for v in sys.version_info[:3])
-QT_VERSION = qVersion()
+QT_VERSION = 'n/a'
 
 
 def is_windows() -> bool:

@@ -1,7 +1,7 @@
 import logging
 from logging import LogRecord, StreamHandler
 from logging.handlers import TimedRotatingFileHandler
-from typing import Any
+from typing import Callable
 
 from scihub_eva.utils.path_utils import LOGS_DIR
 
@@ -23,16 +23,19 @@ DEFAULT_LOGGER.addHandler(DEFAULT_LOG_HANDLER)
 LOGGER_SEP = '–' * 30
 
 
-class UISciHubEVALogHandler(StreamHandler):
-    def __init__(self, ui_scihub_eva: Any) -> None:
-        super(UISciHubEVALogHandler, self).__init__()
+class CallbackLogHandler(StreamHandler):
+    """Log handler that forwards formatted records to an arbitrary callback."""
 
+    def __init__(self, callback: Callable[[str], None]) -> None:
+        super().__init__()
         self.formatter = DEFAULT_LOG_FORMATTER
-        self._ui_scihub_eva = ui_scihub_eva
+        self._callback = callback
 
     def emit(self, record: LogRecord) -> None:
-        message = self.format(record)
-        self._ui_scihub_eva.append_log.emit(message)
+        try:
+            self._callback(self.format(record))
+        except Exception:
+            self.handleError(record)
 
 
 __all__ = [
@@ -42,5 +45,5 @@ __all__ = [
     'DEFAULT_LOG_FORMATTER',
     'DEFAULT_LOGGER',
     'LOGGER_SEP',
-    'UISciHubEVALogHandler',
+    'CallbackLogHandler',
 ]

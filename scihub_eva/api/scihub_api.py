@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 
 from lxml.etree import HTML
 from pathvalidate import sanitize_filename
-from PySide6.QtCore import QObject
 from requests import Response, Session
 
 from scihub_eva.globals.preferences import *
@@ -45,7 +44,7 @@ class SciHubAPIError(Enum):
     DDOS_GUARD = 4
 
 
-class SciHubAPI(QObject, threading.Thread):
+class SciHubAPI(threading.Thread):
     def __init__(
         self,
         logger: logging.Logger,
@@ -57,7 +56,6 @@ class SciHubAPI(QObject, threading.Thread):
         rampage_type: SciHubAPIRampageType = SciHubAPIRampageType.RAW,
         scihub_urls: list[str] | None = None,
     ) -> None:
-        QObject.__init__(self)
         threading.Thread.__init__(self, daemon=True)
 
         self._logger = logger
@@ -149,12 +147,12 @@ class SciHubAPI(QObject, threading.Thread):
             pdf_url = pdf_url.geturl()
             pdf_url_html = f'<a href="{pdf_url}">{pdf_url}</a>'
 
-            self._logger.info(self.tr('Got PDF URL: ') + pdf_url_html)
+            self._logger.info(('Got PDF URL: ') + pdf_url_html)
         else:
             err = SciHubAPIError.NO_VALID_PDF
 
-            self._logger.error(self.tr('Failed to get PDF URL!'))
-            self._logger.error(self.tr('You need to check it manually.'))
+            self._logger.error(('Failed to get PDF URL!'))
+            self._logger.error(('You need to check it manually.'))
 
         return pdf_url, err
 
@@ -165,7 +163,7 @@ class SciHubAPI(QObject, threading.Thread):
 
     def fetch_pdf_url(self, query: str) -> tuple[Any, Any]:
         query_type = guess_query_type(query)
-        self._logger.info(self.tr('Query type: ') + query_type.upper())
+        self._logger.info(('Query type: ') + query_type.upper())
 
         if query_type == 'pdf':
             return query, None
@@ -175,15 +173,15 @@ class SciHubAPI(QObject, threading.Thread):
         for mirror in self._mirror_list:
             self._scihub_url = mirror
             self._logger.info(
-                self.tr('Using Sci-Hub URL: ')
+                ('Using Sci-Hub URL: ')
                 + f'<a href="{mirror}">{mirror}</a>'
             )
 
             try:
-                self._logger.info(self.tr('Fetching PDF URL ...'))
+                self._logger.info(('Fetching PDF URL ...'))
                 pdf_url_response = self.query_pdf_url(query)
             except Exception as e:
-                self._logger.warning(self.tr('Mirror unreachable: ') + mirror)
+                self._logger.warning(('Mirror unreachable: ') + mirror)
                 self._logger.warning(str(e))
                 last_err = SciHubAPIError.UNKNOWN
                 continue
@@ -194,11 +192,11 @@ class SciHubAPI(QObject, threading.Thread):
                     pdf_url_response.status_code == 403
                     and 'ddos-guard' in content.lower()
                 ):
-                    self._logger.warning(self.tr('DDoS-Guard on: ') + mirror)
+                    self._logger.warning(('DDoS-Guard on: ') + mirror)
                     last_err = SciHubAPIError.DDOS_GUARD
                 else:
                     self._logger.warning(
-                        self.tr('HTTP {} on: ').format(pdf_url_response.status_code)
+                        ('HTTP {} on: ').format(pdf_url_response.status_code)
                         + mirror
                     )
                     last_err = SciHubAPIError.UNKNOWN
@@ -214,8 +212,8 @@ class SciHubAPI(QObject, threading.Thread):
             if err == SciHubAPIError.NO_VALID_PDF:
                 break
 
-        self._logger.error(self.tr('All mirrors failed for this query.'))
-        self._logger.error(self.tr('You need to check it manually.'))
+        self._logger.error(('All mirrors failed for this query.'))
+        self._logger.error(('You need to check it manually.'))
         return None, last_err
 
     def get_captcha_info(self, pdf_captcha_response: Any) -> tuple[Any, Any]:
@@ -292,11 +290,11 @@ class SciHubAPI(QObject, threading.Thread):
         )
 
         if pdf_response.status_code != 200:
-            self._logger.error(self.tr('Error {}').format(pdf_response.status_code))
-            self._logger.info(self.tr('You need to check it manually.'))
+            self._logger.error(('Error {}').format(pdf_response.status_code))
+            self._logger.info(('You need to check it manually.'))
             err = SciHubAPIError.UNKNOWN
         elif pdf_response.headers['Content-Type'] == 'application/pdf':
-            self._logger.info(self.tr('Angel [CAPTCHA] down!'))
+            self._logger.info(('Angel [CAPTCHA] down!'))
             pdf = pdf_response.content
         else:
             pdf = pdf_response
@@ -305,7 +303,7 @@ class SciHubAPI(QObject, threading.Thread):
         return pdf, err
 
     def fetch_pdf(self, pdf_url: str) -> tuple[Any, Any]:
-        self._logger.info(self.tr('Fetching PDF ...'))
+        self._logger.info(('Fetching PDF ...'))
 
         pdf, err = None, None
 
@@ -320,23 +318,23 @@ class SciHubAPI(QObject, threading.Thread):
             )
 
             if pdf_response.status_code != 200:
-                self._logger.error(self.tr('Error {}').format(pdf_response.status_code))
-                self._logger.error(self.tr('You need to check it manually.'))
+                self._logger.error(('Error {}').format(pdf_response.status_code))
+                self._logger.error(('You need to check it manually.'))
                 err = SciHubAPIError.UNKNOWN
             elif pdf_response.headers['Content-Type'] == 'application/pdf':
                 pdf = pdf_response.content
             elif pdf_response.headers['Content-Type'].startswith('text/html'):
-                self._logger.warning(self.tr('Angel [CAPTCHA] is coming!'))
+                self._logger.warning(('Angel [CAPTCHA] is coming!'))
                 err = SciHubAPIError.BLOCKED_BY_CAPTCHA
                 pdf = pdf_response
             else:
-                self._logger.error(self.tr('Unknown PDF Content-Type!'))
-                self._logger.error(self.tr('You need to check it manually.'))
+                self._logger.error(('Unknown PDF Content-Type!'))
+                self._logger.error(('You need to check it manually.'))
         except Exception as e:
             err = SciHubAPIError.UNKNOWN
 
-            self._logger.error(self.tr('Failed to get PDF!'))
-            self._logger.error(self.tr('You need to check it manually.'))
+            self._logger.error(('Failed to get PDF!'))
+            self._logger.error(('You need to check it manually.'))
             self._logger.error(str(e))
 
         return pdf, err
@@ -361,7 +359,7 @@ class SciHubAPI(QObject, threading.Thread):
             pdf_name = pdf_name_formatter.format(**pdf_metadata)
         except Exception:
             self._logger.error(
-                self.tr('Unsupported filename keywords: ') + pdf_name_formatter
+                'Unsupported filename keywords: ' + pdf_name_formatter
             )
             return
 
@@ -374,7 +372,7 @@ class SciHubAPI(QObject, threading.Thread):
             value_type=bool,
         )
         if pdf_path.exists() and not overwrite:
-            self._logger.info(self.tr('File already exists, skipping: ') + pdf_name)
+            self._logger.info(('File already exists, skipping: ') + pdf_name)
             record_download(
                 doi=self._raw_query if guess_query_type(self._raw_query) in ['doi', 'pmid'] else '',
                 filename=pdf_name,
@@ -390,7 +388,7 @@ class SciHubAPI(QObject, threading.Thread):
 
         pdf_link = f'<a href="{pdf_path.as_uri()}">{pdf_path.as_posix()}</a>'
 
-        self._logger.info(self.tr('Saved PDF as: ') + pdf_link)
+        self._logger.info(('Saved PDF as: ') + pdf_link)
         record_download(
             doi=self._raw_query if guess_query_type(self._raw_query) in ['doi', 'pmid'] else '',
             filename=pdf_name,
@@ -403,7 +401,7 @@ class SciHubAPI(QObject, threading.Thread):
     ) -> tuple[Any, Any]:
         if rampage_type == SciHubAPIRampageType.RAW:
             self._logger.info(LOGGER_SEP)
-            self._logger.info(self.tr('Dealing with query: ') + query)
+            self._logger.info(('Dealing with query: ') + query)
 
             # Fetch PDF URL
             pdf_url, err = self.fetch_pdf_url(query)
@@ -425,7 +423,7 @@ class SciHubAPI(QObject, threading.Thread):
             pdf, err = self.fetch_pdf_with_captcha(query)
             if err == SciHubAPIError.WRONG_CAPTCHA:
                 self._logger.error(
-                    self.tr('Wrong captcha, failed to kill Angel [CAPTCHA]!')
+                    ('Wrong captcha, failed to kill Angel [CAPTCHA]!')
                 )
                 return None, err
 
