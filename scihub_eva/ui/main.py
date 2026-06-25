@@ -11,6 +11,8 @@ from scihub_eva.api.scihub_api import SciHubAPI, SciHubAPIError, SciHubAPIRampag
 from scihub_eva.globals.preferences import (
     API_SCIHUB_URL_DEFAULT,
     API_SCIHUB_URL_KEY,
+    API_SCIHUB_URLS_DEFAULT,
+    API_SCIHUB_URLS_KEY,
     FILE_SAVE_TO_DIR_DEFAULT,
     FILE_SAVE_TO_DIR_KEY,
 )
@@ -183,6 +185,10 @@ class UISciHubEVA(QObject):
         del self._scihub_api
         gc.collect()
 
+        scihub_urls = Preferences.get_or_default(
+            API_SCIHUB_URLS_KEY, API_SCIHUB_URLS_DEFAULT, value_type=list
+        )
+
         self._scihub_api = SciHubAPI(
             self._logger,
             self.rampage_callback,
@@ -191,6 +197,7 @@ class UISciHubEVA(QObject):
             raw_query=query,
             query=query,
             rampage_type=SciHubAPIRampageType.RAW,
+            scihub_urls=scihub_urls,
         )
 
         self.before_rampage.emit()
@@ -225,6 +232,10 @@ class UISciHubEVA(QObject):
         del self._scihub_api
         gc.collect()
 
+        scihub_urls = Preferences.get_or_default(
+            API_SCIHUB_URLS_KEY, API_SCIHUB_URLS_DEFAULT, value_type=list
+        )
+
         self._scihub_api = SciHubAPI(
             self._logger,
             self.rampage_callback,
@@ -233,6 +244,7 @@ class UISciHubEVA(QObject):
             raw_query=raw_query,
             query=pdf_captcha_response,
             rampage_type=SciHubAPIRampageType.WITH_CAPTCHA,
+            scihub_urls=scihub_urls,
         )
 
         _, captcha_img_url = self._scihub_api.get_captcha_info(pdf_captcha_response)

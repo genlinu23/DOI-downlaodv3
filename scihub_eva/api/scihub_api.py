@@ -54,6 +54,7 @@ class SciHubAPI(QObject, threading.Thread):
         raw_query: str | None = None,
         query: str | None = None,
         rampage_type: SciHubAPIRampageType = SciHubAPIRampageType.RAW,
+        scihub_urls: list[str] | None = None,
     ) -> None:
         QObject.__init__(self)
         threading.Thread.__init__(self, daemon=True)
@@ -67,6 +68,10 @@ class SciHubAPI(QObject, threading.Thread):
         self._query = query
         self._rampage_type = rampage_type
         self._captcha_answer: str | None = None
+
+        # Build ordered mirror list: preferred first, then the rest deduplicated
+        _extra = [u for u in (scihub_urls or []) if u != scihub_url]
+        self._mirror_list: list[str] = [scihub_url] + _extra
 
     def __del__(self) -> None:
         self._sess.close()
@@ -152,57 +157,65 @@ class SciHubAPI(QObject, threading.Thread):
 
         return pdf_url, err
 
-    def fetch_pdf_url(self, query: str) -> tuple[Any, Any]:
-        self._logger.info(
-            self.tr('Using Sci-Hub URL: ')
-            + f'<a href="{self._scihub_url}">{self._scihub_url}</a>'
-        )
+    def _promote_mirror(self, mirror: str) -> None:
+        if mirror in self._mirror_list:
+            self._mirror_list.remove(mirror)
+            self._mirror_list.insert(0, mirror)
 
+    def fetch_pdf_url(self, query: str) -> tuple[Any, Any]:
         query_type = guess_query_type(query)
         self._logger.info(self.tr('Query type: ') + query_type.upper())
 
-        pdf_url = query
-        err = None
+        if query_type == 'pdf':
+            return query, None
 
-        if query_type != 'pdf':
+        last_err: Any = SciHubAPIError.UNKNOWN
+
+        for mirror in self._mirror_list:
+            self._scihub_url = mirror
+            self._logger.info(
+                self.tr('Using Sci-Hub URL: ')
+                + f'<a href="{mirror}">{mirror}</a>'
+            )
+
             try:
                 self._logger.info(self.tr('Fetching PDF URL ...'))
-
                 pdf_url_response = self.query_pdf_url(query)
-
-                if pdf_url_response.status_code != 200:
-                    content = pdf_url_response.content.decode('utf-8')
-
-                    if (
-                        pdf_url_response.status_code == 403
-                        and 'ddos-guard' in content.lower()
-                    ):
-                        err = SciHubAPIError.DDOS_GUARD
-                        self._logger.error(
-                            self.tr('Downloading is blocked by DDoS-Guard!')
-                        )
-                        self._logger.error(self.tr('You need to change a clean IP.'))
-                        self._logger.error(
-                            self.tr(
-                                'Or use <a href="https://github.com/FlareSolverr/FlareSolverr">FlareSolverr</a> to bypass it.'
-                            )
-                        )
-                    else:
-                        err = SciHubAPIError.UNKNOWN
-                        self._logger.error(
-                            self.tr('Error {}').format(pdf_url_response.status_code)
-                        )
-                        self._logger.error(self.tr('You need to check it manually.'))
-                else:
-                    pdf_url, err = self.extract_pdf_url(pdf_url_response)
             except Exception as e:
-                err = SciHubAPIError.UNKNOWN
+                self._logger.warning(self.tr('Mirror unreachable: ') + mirror)
+                self._logger.warning(str(e))
+                last_err = SciHubAPIError.UNKNOWN
+                continue
 
-                self._logger.error(self.tr('Failed to get PDF URL!'))
-                self._logger.error(self.tr('You need to check it manually.'))
-                self._logger.error(str(e))
+            if pdf_url_response.status_code != 200:
+                content = pdf_url_response.content.decode('utf-8', errors='replace')
+                if (
+                    pdf_url_response.status_code == 403
+                    and 'ddos-guard' in content.lower()
+                ):
+                    self._logger.warning(self.tr('DDoS-Guard on: ') + mirror)
+                    last_err = SciHubAPIError.DDOS_GUARD
+                else:
+                    self._logger.warning(
+                        self.tr('HTTP {} on: ').format(pdf_url_response.status_code)
+                        + mirror
+                    )
+                    last_err = SciHubAPIError.UNKNOWN
+                continue
 
-        return pdf_url, err
+            pdf_url, err = self.extract_pdf_url(pdf_url_response)
+            if err is None:
+                self._promote_mirror(mirror)
+                return pdf_url, None
+
+            last_err = err
+            # NO_VALID_PDF is not a mirror issue — stop trying
+            if err == SciHubAPIError.NO_VALID_PDF:
+                break
+
+        self._logger.error(self.tr('All mirrors failed for this query.'))
+        self._logger.error(self.tr('You need to check it manually.'))
+        return None, last_err
 
     def get_captcha_info(self, pdf_captcha_response: Any) -> tuple[Any, Any]:
         captcha_id, captcha_img_url = None, None
