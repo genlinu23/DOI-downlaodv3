@@ -1,6 +1,54 @@
 import multiprocessing
 import os
+import subprocess
 import sys
+from pathlib import Path
+
+
+def _ensure_resources() -> None:
+    """Recompile resources.py if any QML/image file is newer than it."""
+    base = Path(__file__).parent
+    qrc = base / 'SciHubEVA.qrc'
+    resources_py = base / 'scihub_eva' / 'resources.py'
+
+    # Collect all source files listed in the QRC
+    sources = [qrc]
+    try:
+        import xml.etree.ElementTree as ET
+        for f in ET.parse(qrc).iter('file'):
+            sources.append(base / f.text.strip())
+    except Exception:
+        pass
+
+    needs_rebuild = (
+        not resources_py.exists()
+        or any(
+            s.exists() and s.stat().st_mtime > resources_py.stat().st_mtime
+            for s in sources
+        )
+    )
+
+    if needs_rebuild:
+        print('[dev] Recompiling resources...', flush=True)
+        result = subprocess.run(
+            [sys.executable, '-m', 'PySide6.scripts.pyside_tool', 'rcc',
+             str(qrc), '-o', str(resources_py)],
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            # Fallback: try pyside6-rcc directly
+            result = subprocess.run(
+                ['pyside6-rcc', str(qrc), '-o', str(resources_py)],
+                capture_output=True, text=True,
+            )
+        if result.returncode != 0:
+            print('[dev] WARNING: resource recompile failed:', result.stderr, flush=True)
+        else:
+            print('[dev] Resources recompiled OK.', flush=True)
+
+
+_ensure_resources()
+
 
 from PySide6.QtCore import QCoreApplication, QTranslator
 from PySide6.QtGui import QGuiApplication, QIcon

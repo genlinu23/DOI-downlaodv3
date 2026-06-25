@@ -18,6 +18,9 @@ dependencies = [
     "urllib3==2.6.3",
 ]
 
+[tool.setuptools.packages.find]
+include = ["scihub_eva*"]
+
 [dependency-groups]
 dev = [
     "flask==3.1.3",
