@@ -147,10 +147,12 @@ class UISciHubEVA(QObject):
             if is_text_file(raw_query):
                 self._query_list = deque()
 
+                seen: set = set()
                 with open(raw_query, 'rt') as f:
                     for line in f:
                         cleaned_line = line.strip()
-                        if cleaned_line != '':
+                        if cleaned_line and cleaned_line not in seen:
+                            seen.add(cleaned_line)
                             self._query_list.append(cleaned_line)
 
                 self._query_list_length = len(self._query_list)

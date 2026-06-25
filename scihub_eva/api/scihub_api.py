@@ -1,6 +1,5 @@
 import logging
 import threading
-import time
 from enum import Enum, unique
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -333,13 +332,6 @@ class SciHubAPI(QObject, threading.Thread):
             FILE_FILENAME_PREFIX_FORMAT_KEY, FILE_FILENAME_PREFIX_FORMAT_DEFAULT
         )
 
-        if not Preferences.get_or_default(
-            FILE_OVERWRITE_EXISTING_FILE_KEY,
-            FILE_OVERWRITE_EXISTING_FILE_DEFAULT,
-            value_type=bool,
-        ):
-            pdf_name_formatter += '_' + str(round(time.time() * 1000000))
-
         pdf_metadata = get_pdf_metadata(pdf)
         query_type = guess_query_type(self._raw_query)
 
@@ -361,6 +353,15 @@ class SciHubAPI(QObject, threading.Thread):
 
         pdf_name = sanitize_filename(pdf_name, replacement_text='-')
         pdf_path = Path(Preferences.get(FILE_SAVE_TO_DIR_KEY)) / pdf_name
+
+        overwrite = Preferences.get_or_default(
+            FILE_OVERWRITE_EXISTING_FILE_KEY,
+            FILE_OVERWRITE_EXISTING_FILE_DEFAULT,
+            value_type=bool,
+        )
+        if pdf_path.exists() and not overwrite:
+            self._logger.info(self.tr('File already exists, skipping: ') + pdf_name)
+            return
 
         pdf_path.parent.mkdir(parents=True, exist_ok=True)
 
