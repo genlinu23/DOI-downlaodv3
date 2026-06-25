@@ -31,6 +31,7 @@ from scihub_eva.utils.logging_utils import (
 )
 from scihub_eva.utils.network_utils import get_session
 from scihub_eva.utils.preferences_utils import Preferences
+from scihub_eva.utils.download_log import DOWNLOAD_LOG_FILE
 from scihub_eva.utils.sys_utils import (
     PYTHON_VERSION,
     QT_VERSION,
@@ -102,6 +103,7 @@ class UISciHubEVA(QObject):
         self.window.showUIPreference.connect(self.show_ui_preference)  # type: ignore
         self.window.systemOpenLogFile.connect(self.system_open_log_file)  # type: ignore
         self.window.systemOpenLogDirectory.connect(self.system_open_log_directory)  # type: ignore
+        self.window.systemOpenDownloadLog.connect(self.system_open_download_log)  # type: ignore
         self.window.exportFailedQueries.connect(self.export_failed_queries)  # type: ignore
         self.window.rampage.connect(self.rampage)  # type: ignore
 
@@ -137,6 +139,10 @@ class UISciHubEVA(QObject):
     @Slot()
     def system_open_log_directory(self) -> None:
         open_directory(DEFAULT_LOG_DIRECTORY)
+
+    @Slot()
+    def system_open_download_log(self) -> None:
+        open_file(DOWNLOAD_LOG_FILE)
 
     @Slot(str)
     def export_failed_queries(self, path: str) -> None:

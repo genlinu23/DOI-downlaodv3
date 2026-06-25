@@ -13,6 +13,7 @@ from requests import Response, Session
 
 from scihub_eva.globals.preferences import *
 from scihub_eva.utils.api_utils import get_pdf_metadata, guess_query_type
+from scihub_eva.utils.download_log import record_download
 from scihub_eva.utils.logging_utils import LOGGER_SEP
 from scihub_eva.utils.preferences_utils import Preferences
 
@@ -374,6 +375,12 @@ class SciHubAPI(QObject, threading.Thread):
         )
         if pdf_path.exists() and not overwrite:
             self._logger.info(self.tr('File already exists, skipping: ') + pdf_name)
+            record_download(
+                doi=self._raw_query if guess_query_type(self._raw_query) in ['doi', 'pmid'] else '',
+                filename=pdf_name,
+                scihub_url=self._scihub_url,
+                status='skipped',
+            )
             return
 
         pdf_path.parent.mkdir(parents=True, exist_ok=True)
@@ -384,6 +391,12 @@ class SciHubAPI(QObject, threading.Thread):
         pdf_link = f'<a href="{pdf_path.as_uri()}">{pdf_path.as_posix()}</a>'
 
         self._logger.info(self.tr('Saved PDF as: ') + pdf_link)
+        record_download(
+            doi=self._raw_query if guess_query_type(self._raw_query) in ['doi', 'pmid'] else '',
+            filename=pdf_name,
+            scihub_url=self._scihub_url,
+            status='success',
+        )
 
     def rampage(
         self, query: Any, rampage_type: SciHubAPIRampageType

@@ -31,6 +31,7 @@ ApplicationWindow {
     signal showUIPreference()
     signal systemOpenLogFile()
     signal systemOpenLogDirectory()
+    signal systemOpenDownloadLog()
     signal exportFailedQueries(string path)
     signal rampage(string query)
 
@@ -453,6 +454,11 @@ ApplicationWindow {
                         Platform.MenuItem {
                             text: qsTr("Open log directory")
                             onTriggered: systemOpenLogDirectory()
+                        }
+
+                        Platform.MenuItem {
+                            text: qsTr("Open download records (CSV)")
+                            onTriggered: systemOpenDownloadLog()
                         }
 
                         Platform.MenuItem {
