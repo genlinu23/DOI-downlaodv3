@@ -46,6 +46,8 @@ class UISciHubEVA(QObject):
     append_log = Signal(str)
     before_rampage = Signal()
     after_rampage = Signal()
+    update_progress = Signal(int, int, int, int)   # completed, total, success, failed
+    update_task_row = Signal(str, str, str, str)    # doi, mirror, speed, status
 
     # Internal signal to route worker-thread callbacks back to the main thread
     _rampage_done = Signal(str, object, object)
@@ -74,6 +76,9 @@ class UISciHubEVA(QObject):
         self._query_list_length = 0
         self._captcha_img_file_path: str = ''
         self._failed_queries: set = set()
+        self._success_count = 0
+        self._failed_count = 0
+        self._completed_count = 0
 
         # Parallel download: list of active SciHubAPI threads (main-thread only)
         self._active_apis: list[SciHubAPI] = []
@@ -104,6 +109,8 @@ class UISciHubEVA(QObject):
         self.append_log.connect(self.window.appendLog)  # type: ignore
         self.before_rampage.connect(self.window.beforeRampage)  # type: ignore
         self.after_rampage.connect(self.window.afterRampage)  # type: ignore
+        self.update_progress.connect(self.window.updateProgress)  # type: ignore
+        self.update_task_row.connect(self.window.updateTaskRow)  # type: ignore
 
         self._rampage_done.connect(self._on_rampage_done)  # type: ignore
 
@@ -160,6 +167,12 @@ class UISciHubEVA(QObject):
                             self._query_list.append(cleaned_line)
 
                 self._query_list_length = len(self._query_list)
+                self._success_count = 0
+                self._failed_count = 0
+                self._completed_count = 0
+                self.update_progress.emit(0, self._query_list_length, 0, 0)
+                for q in self._query_list:
+                    self.update_task_row.emit(q, '', '', 'queued')
                 self.before_rampage.emit()
                 self.rampage_query_list()
             else:
@@ -168,9 +181,21 @@ class UISciHubEVA(QObject):
         elif is_range_query(raw_query):
             self._query_list = deque(gen_range_query_list(raw_query))
             self._query_list_length = len(self._query_list)
+            self._success_count = 0
+            self._failed_count = 0
+            self._completed_count = 0
+            self.update_progress.emit(0, self._query_list_length, 0, 0)
+            for q in self._query_list:
+                self.update_task_row.emit(q, '', '', 'queued')
             self.before_rampage.emit()
             self.rampage_query_list()
         else:
+            self._query_list_length = 1
+            self._success_count = 0
+            self._failed_count = 0
+            self._completed_count = 0
+            self.update_progress.emit(0, 1, 0, 0)
+            self.update_task_row.emit(raw_query, '', '', 'queued')
             self.before_rampage.emit()
             self.rampage_query(raw_query)
 
@@ -196,6 +221,7 @@ class UISciHubEVA(QObject):
                     done_so_far, self._query_list_length
                 )
             )
+            self.update_task_row.emit(query, '', '', 'resolving')
             api = SciHubAPI(
                 self._logger,
                 self.rampage_callback,
@@ -243,18 +269,33 @@ class UISciHubEVA(QObject):
         # Remove finished API from active list
         self._active_apis = [a for a in self._active_apis if a.raw_query != raw_query]
 
+        self._completed_count += 1
+
         if err in (
             SciHubAPIError.UNKNOWN,
             SciHubAPIError.WRONG_CAPTCHA,
             SciHubAPIError.NO_VALID_PDF,
         ):
             self._failed_queries.add(raw_query)
+            self._failed_count += 1
+            self.update_task_row.emit(raw_query, '', '', 'failed:' + err.name)
         elif err is None:
             self._failed_queries.discard(raw_query)
+            self._success_count += 1
+            self.update_task_row.emit(raw_query, '', '', 'success')
+
+        self.update_progress.emit(
+            self._completed_count,
+            self._query_list_length,
+            self._success_count,
+            self._failed_count,
+        )
 
         if err == SciHubAPIError.BLOCKED_BY_CAPTCHA:
             # Captcha only blocks this slot; other slots keep running
             self._failed_queries.add(raw_query)
+            self._failed_count += 1
+            self.update_task_row.emit(raw_query, '', '', 'failed:CAPTCHA')
             self._logger.warning(
                 self.tr('Captcha encountered for {}, added to failed list.').format(
                     raw_query

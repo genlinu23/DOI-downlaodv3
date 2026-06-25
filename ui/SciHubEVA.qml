@@ -47,12 +47,30 @@ ApplicationWindow {
         buttonRampage.enabled = false
         buttonLoadInputQueryList.enabled = false
         buttonOpenSaveToDir.enabled = false
+        progressBarTotal.value = 0
+        labelProgress.text = "0 / 0   ✓ 0   ✗ 0"
+        listModelTasks.clear()
     }
 
     function afterRampage() {
         buttonRampage.enabled = true
         buttonLoadInputQueryList.enabled = true
         buttonOpenSaveToDir.enabled = true
+    }
+
+    function updateProgress(completed, total, successCount, failedCount) {
+        progressBarTotal.value = total > 0 ? completed / total : 0
+        labelProgress.text = completed + " / " + total + "   ✓ " + successCount + "   ✗ " + failedCount
+    }
+
+    function updateTaskRow(doi, mirror, speed, status) {
+        for (var i = 0; i < listModelTasks.count; i++) {
+            if (listModelTasks.get(i).doi === doi) {
+                listModelTasks.set(i, { "doi": doi, "mirror": mirror, "speed": speed, "status": status })
+                return
+            }
+        }
+        listModelTasks.append({ "doi": doi, "mirror": mirror, "speed": speed, "status": status })
     }
 
     UI.About {
@@ -277,17 +295,114 @@ ApplicationWindow {
             }
         }
 
-        Label {
-            id: labelLogs
-            text: qsTr("Logs: ")
+        // Progress row
+        RowLayout {
+            Layout.fillWidth: true
+
+            ProgressBar {
+                id: progressBarTotal
+                Layout.fillWidth: true
+                from: 0
+                to: 1
+                value: 0
+            }
+
+            Label {
+                id: labelProgress
+                text: "0 / 0   ✓ 0   ✗ 0"
+                Layout.minimumWidth: 160
+            }
+        }
+
+        // Task list
+        ListModel {
+            id: listModelTasks
+        }
+
+        ListView {
+            id: listViewTasks
+            Layout.fillWidth: true
+            Layout.minimumHeight: 160
+            Layout.preferredHeight: 200
+            model: listModelTasks
+            clip: true
+            ScrollBar.vertical: UIElements.ScrollBar {}
+
+            delegate: ItemDelegate {
+                width: ListView.view.width
+
+                contentItem: RowLayout {
+                    spacing: 6
+
+                    Label {
+                        text: model.status === "success" ? "✓"
+                            : model.status.startsWith("failed") ? "✗" : "⏳"
+                        color: model.status === "success"
+                            ? Material.color(Material.Green)
+                            : model.status.startsWith("failed")
+                                ? Material.color(Material.Red)
+                                : Material.foreground
+                        Layout.minimumWidth: 20
+                    }
+
+                    Label {
+                        text: model.doi
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+
+                    Label {
+                        text: model.mirror || "—"
+                        color: Material.accent
+                        Layout.minimumWidth: 100
+                    }
+
+                    Label {
+                        text: {
+                            var s = model.status
+                            if (s === "queued")      return qsTr("Waiting")
+                            if (s === "resolving")   return qsTr("Resolving")
+                            if (s === "downloading") return qsTr("Downloading")
+                            if (s === "success")     return qsTr("Done")
+                            if (s === "skipped")     return qsTr("Skipped")
+                            if (s === "failed:NO_VALID_PDF") return qsTr("No PDF")
+                            if (s === "failed:DDOS_GUARD")   return qsTr("Blocked")
+                            if (s === "failed:CAPTCHA")      return qsTr("Captcha")
+                            if (s.startsWith("failed"))      return qsTr("Failed")
+                            return s
+                        }
+                        Layout.minimumWidth: 80
+                    }
+                }
+            }
+        }
+
+        // Collapsible log area
+        property bool logsExpanded: false
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            Label {
+                id: labelLogs
+                text: qsTr("Logs")
+            }
+
+            Button {
+                flat: true
+                text: applicationWindowSciHubEVA.logsExpanded ? qsTr("▲ Hide") : qsTr("▼ Show")
+                onClicked: applicationWindowSciHubEVA.logsExpanded = !applicationWindowSciHubEVA.logsExpanded
+            }
         }
 
         Flickable {
             id: flickableLogs
 
+            visible: applicationWindowSciHubEVA.logsExpanded
             flickableDirection: Flickable.VerticalFlick
 
-            Layout.minimumHeight: 200
+            Layout.minimumHeight: applicationWindowSciHubEVA.logsExpanded ? 120 : 0
+            Layout.preferredHeight: applicationWindowSciHubEVA.logsExpanded ? 160 : 0
             Layout.fillWidth: true
 
             ScrollBar.vertical: UIElements.ScrollBar {
