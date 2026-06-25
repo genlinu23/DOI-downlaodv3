@@ -1,0 +1,328 @@
+# Changelog
+
+## [6.5.1](https://github.com/leovan/SciHubEVA/compare/v6.5.0...v6.5.1) (2026-03-08)
+
+### Bug Fixes
+
+- Fix preference reading bug on Windows.
+
+## [6.5.0](https://github.com/leovan/SciHubEVA/compare/v6.4.1...v6.5.0) (2026-03-07)
+
+### Features
+
+- Remove DDoS-Guard bypass.
+- Add more clear log when downloading is blocked by DDos-Guard.
+
+## [6.4.1](https://github.com/leovan/SciHubEVA/compare/v6.4.0...v6.4.1) (2026-01-10)
+
+### Bug Fixes
+
+- Fix not stop downloading when closed. ([#69](https://github.com/leovan/SciHubEVA/issues/69))
+
+## [6.4.0](https://github.com/leovan/SciHubEVA/compare/v6.3.1...v6.4.0) (2025-11-02)
+
+### Features
+
+- Add custom PDF, captcha id and captcha image XPath support.
+
+### Bug Fixes
+
+- Fix captcha display bug. ([#65](https://github.com/leovan/SciHubEVA/issues/65))
+
+## [6.3.1](https://github.com/leovan/SciHubEVA/compare/v6.3.0...v6.3.1) (2025-02-05)
+
+### Bug Fixes
+
+- Fix building on Ubuntu.
+
+## [6.3.0](https://github.com/leovan/SciHubEVA/compare/v6.2.5...v6.3.0) (2024-05-12)
+
+### Features
+
+- Add failed queries exporting.
+
+## [6.2.5](https://github.com/leovan/SciHubEVA/compare/v6.2.4...v6.2.5) (2024-02-06)
+
+### Tests
+
+- Add arm64 arch macOS GitHub Actions building.
+
+## [6.2.4](https://github.com/leovan/SciHubEVA/compare/v6.2.3...v6.2.4) (2023-11-12)
+
+### Bug Fixes
+
+- Close PDFParser and manual gc to avoid memory leak.
+
+## [6.2.3](https://github.com/leovan/SciHubEVA/compare/v6.2.2...v6.2.3) (2023-09-10)
+
+### Bug Fixes
+
+- Fix DDos-Guard bypass cookies handling.
+
+## [6.2.2](https://github.com/leovan/SciHubEVA/compare/v6.2.1...v6.2.2) (2023-09-09)
+
+### Features
+
+- Add DDos-Guard bypass (not fully tested).
+- Reuse network session to speed up downloading.
+
+## [6.2.1](https://github.com/leovan/SciHubEVA/compare/v6.2.0...v6.2.1) (2023-08-25)
+
+### Features
+
+- Optimize default font rendering on Windows.
+
+## [6.2.0](https://github.com/leovan/SciHubEVA/compare/v6.1.0...v6.2.0) (2023-08-19)
+
+### Features
+
+- Add Linux building target with AppImage.
+- Add macOS arm64 building target.
+- Add Windows scoop install support.
+
+### Bug Fixes
+
+- Fix error opening downloaded file link in log on different OS.
+
+## [6.1.0](https://github.com/leovan/SciHubEVA/compare/v6.0.0...v6.1.0) (2023-05-25)
+
+### Bug Fixes
+
+- Optimize fetching PDF URL when link is a relative path.
+
+### Features
+
+- Change to Material 3 theme.
+
+## [6.0.0](https://github.com/leovan/SciHubEVA/compare/v5.1.2...v6.0.0) (2022-10-02)
+
+### Bug Fixes
+
+- Fix error fetching PDF URL when link is a relative path.
+- Fix error fetching PDF URL and PDF when get a non 200 response.
+
+### Tests
+
+- Add Github Actions to auto build and package. ([#51](https://github.com/leovan/SciHubEVA/issues/51))
+
+### Known Issues
+
+- Sci-Hub website is now protected by DDoS-Guard, sometimes it may get errors since the DDoS protection.
+
+## [5.1.2](https://github.com/leovan/SciHubEVA/compare/v5.1.1...v5.1.2) (2022-02-12)
+
+### Bug Fixes
+
+- Fix error fetching PDF URL from different version sci-hub website mirror. ([#47](https://github.com/leovan/SciHubEVA/issues/47))
+
+## [5.1.1](https://github.com/leovan/SciHubEVA/compare/v5.1.0...v5.1.1) (2021-10-16)
+
+### Bug Fixes
+
+- Fix error handling problem when failed to get PDF.
+
+## [5.1.0](https://github.com/leovan/SciHubEVA/compare/v5.0.0...v5.1.0) (2021-09-20)
+
+### Bug Fixes
+
+- Change API according to the new Sci-Hub website.
+
+### Features
+
+- Add Portuguese translation.
+
+## [5.0.0](https://github.com/leovan/SciHubEVA/compare/v4.1.1...v5.0.0) (2021-06-20)
+
+### Breaking Changes
+
+- Change Qt Python binding from PySide2 to PySide6.
+
+## [4.1.1](https://github.com/leovan/SciHubEVA/compare/v4.1.0...v4.1.1) (2020-10-22)
+
+### Bug Fixes
+
+- Fix dialog auto width problem.
+- Fix high DPI scaling problem on Windows.
+
+## [4.1.0](https://github.com/leovan/SciHubEVA/compare/v4.0.1...v4.1.0) (2020-10-19)
+
+### Features
+
+- Restore preferences after a new version installed.
+
+### Bug Fixes
+
+- Fix network retry times and proxy.
+
+## [4.0.1](https://github.com/leovan/SciHubEVA/compare/v4.0.0...v4.0.1) (2020-05-05)
+
+### Features
+
+- Center windows based on parent.
+
+## [4.0.0](https://github.com/leovan/SciHubEVA/compare/v3.2.3...v4.0.0) (2020-05-02)
+
+### Features
+
+- More modern preference dialog.
+- Invert captcha image when dark theme is enabled.
+
+## [3.2.3](https://github.com/leovan/SciHubEVA/compare/v3.2.2...v3.2.3) (2019-10-29)
+
+### Features
+
+- Add log file, right clicking log area can pop up menu to open log file or log directory. ([#21](https://github.com/leovan/SciHubEVA/issues/21))
+
+### Bug Fixes
+
+- Fix illegal filename on Windows. ([#20](https://github.com/leovan/SciHubEVA/issues/20))
+
+## [3.2.2](https://github.com/leovan/SciHubEVA/compare/v3.2.1...v3.2.2) (2019-10-12)
+
+### Features
+
+- Add PMID and DOI filename keywords. ([#17](https://github.com/leovan/SciHubEVA/issues/17))
+
+### Bug Fixes
+
+- Fix OpenGL problem. ([#18](https://github.com/leovan/SciHubEVA/issues/18))
+
+## [3.2.1](https://github.com/leovan/SciHubEVA/compare/v3.2.0...v3.2.1) (2019-09-26)
+
+_This is a hotfix version._
+
+### Bug Fixes
+
+- Fix captcha handling bug.
+
+## [3.2.0](https://github.com/leovan/SciHubEVA/compare/v3.1.2...v3.2.0) (2019-09-26)
+
+### Features
+
+- Support doing not overwrite existing file when downloading.
+
+### Bug Fixes
+
+- Fix captcha display bug due to the temporary file problem on Windows. ([#14](https://github.com/leovan/SciHubEVA/issues/14)) ([#16](https://github.com/leovan/SciHubEVA/issues/16))
+
+## [3.1.2](https://github.com/leovan/SciHubEVA/compare/v3.1.1...v3.1.2) (2019-09-10)
+
+### Bug Fixes
+
+- Fix captcha display bug. ([#13](https://github.com/leovan/SciHubEVA/issues/13))
+
+## [3.1.1](https://github.com/leovan/SciHubEVA/compare/v3.1.0...v3.1.1) (2019-08-11)
+
+### Features
+
+- Add buttons and keys binding.
+
+### Bug Fixes
+
+- Fix socks proxy bugs. ([#12](https://github.com/leovan/SciHubEVA/issues/12))
+
+## [3.1.0](https://github.com/leovan/SciHubEVA/compare/v3.0.0...v3.1.0) (2019-08-08)
+
+### Features
+
+- Support range pattern in query.
+
+### Bug Fixes
+
+- Fix captcha handling bugs.
+
+### Tests
+
+- Add a fake server to test different situations. ([#11](https://github.com/leovan/SciHubEVA/issues/11))
+
+## [3.0.0](https://github.com/leovan/SciHubEVA/compare/v2.1.2...v3.0.0) (2019-08-04)
+
+### Features
+
+- Support downloading with query list file. ([#10](https://github.com/leovan/SciHubEVA/issues/10))
+- Add SciHubEVA as a brew cask formula. (Thanks [@womeimingzi11](https://github.com/womeimingzi11))
+
+## [2.1.2](https://github.com/leovan/SciHubEVA/compare/v2.1.1...v2.1.2) (2019-06-04)
+
+### Features
+
+- Change to new icon.
+
+### Bug Fixes
+
+- Fix building with PyInstaller against PySide2 5.12.3+.
+- Fix some bugs.
+
+## [2.1.1](https://github.com/leovan/SciHubEVA/compare/v2.1.0...v2.1.1) (2019-03-27)
+
+### Bug Fixes
+
+- Fix some small bugs.
+
+## [2.1.0](https://github.com/leovan/SciHubEVA/compare/v2.0.1...v2.1.0) (2019-01-16)
+
+### Features
+
+- Fully support dark theme in macOS ("System" option now works).
+
+## [2.0.1](https://github.com/leovan/SciHubEVA/compare/v2.0.0...v2.0.1) (2019-01-09)
+
+### Bug Fixes
+
+- Fix url without scheme error. ([#8](https://github.com/leovan/SciHubEVA/issues/8))
+- Add OpenGL libraries on Windows. ([#1](https://github.com/leovan/SciHubEVA/issues/1))
+
+## [2.0.0](https://github.com/leovan/SciHubEVA/compare/v1.3.0...v2.0.0) (2018-12-22)
+
+### Features
+
+- Support dark theme (Change it in "Preferences", "System" option does not work currently).
+- Add Traditional Chinese support.
+
+### Breaking Changes
+
+- Change Qt Python binding from [PyQt5](https://www.riverbankcomputing.com/software/pyqt) to [PySide2](https://doc.qt.io/qtforpython).
+- Change Windows installer builder from [NSIS](https://nsis.sourceforge.io) to [Inno Setup](http://www.jrsoftware.org/isinfo.php).
+- Change Material Design Icons from [Google](https://github.com/google/material-design-icons) to [Community](https://github.com/templarian/MaterialDesign/).
+
+
+## [1.3.0](https://github.com/leovan/SciHubEVA/compare/v1.2.0...v1.3.0) (2018-08-03)
+
+### Features
+
+- Enhance dealing with HTTP response, e.g. response may be open access article page rather than captcha page.
+- Add feature of opening links in logs.
+
+## [1.2.0](https://github.com/leovan/SciHubEVA/compare/v1.1.0...v1.2.0) (2018-07-07)
+
+### Features
+
+- Add preference button on the main window for env without menu (e.g. Linux).
+- Remove retry with different Sci-Hub URLs.
+
+### Bug Fixes
+
+- Allow user enter captcha. ([#5](https://github.com/leovan/SciHubEVA/issues/5))
+
+## [1.1.0](https://github.com/leovan/SciHubEVA/compare/v1.0.1...v1.1.0) (2018-06-16)
+
+### Features
+
+- Update Sci-Hub API which supports title searching now.
+
+### Bug Fixes
+
+- Fix issue PDF metadata fetching error. ([#2](https://github.com/leovan/SciHubEVA/issues/2))
+
+## [1.0.1](https://github.com/leovan/SciHubEVA/compare/v1.0.0...v1.0.1) (2018-05-28)
+
+### Features
+
+- Change placeholder of query which makes it more clear.
+- Add Windows x86 version.
+
+## 1.0.0 (2018-05-19)
+
+### Features
+
+- First release version.

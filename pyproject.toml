@@ -1,0 +1,52 @@
+[project]
+name = "SciHubEVA"
+authors = [
+    {name = "范叶亮", email = "leo-van@hotmail.com"}
+]
+description = "SciHubEVA"
+readme = "README.md"
+requires-python = ">=3.12"
+version = "6.5.1"
+dependencies = [
+    "darkdetect==0.8.0",
+    "lxml==6.0.2",
+    "pathvalidate==3.3.1",
+    "pdfminer.six==20260107",
+    "PySide6==6.10.2",
+    "PySocks==1.7.1",
+    "requests==2.32.5",
+    "urllib3==2.6.3",
+]
+
+[dependency-groups]
+dev = [
+    "flask==3.1.3",
+    "opencc-python-reimplemented==0.1.7",
+    "pyinstaller==6.19.0",
+    "ruff",
+    "ty",
+]
+
+[tool.ruff.lint]
+select = [
+    "I",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "single"
+
+[tool.ty.src]
+exclude = [
+    "./tests/",
+]
+
+[tool.ty.rules]
+possibly-missing-attribute = "error"
+possibly-missing-import = "error"
+redundant-cast = "ignore"
+unused-ignore-comment = "warn"
+unresolved-import = "warn"

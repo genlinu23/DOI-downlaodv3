@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ui/About.qml</file>
+        <file>ui/AddSciHubURL.qml</file>
+        <file>ui/Captcha.qml</file>
+        <file>ui/Preferences.qml</file>
+        <file>ui/SciHubEVA.qml</file>
+        <file>ui/elements/IconButton.qml</file>
+        <file>ui/elements/ItemDelegate.qml</file>
+        <file>ui/elements/Message.qml</file>
+        <file>ui/elements/ScrollBar.qml</file>
+        <file>images/SciHubEVA-background-dark.png</file>
+        <file>images/SciHubEVA-background-light.png</file>
+        <file>images/SciHubEVA-icon.png</file>
+        <file>images/icons/about.svg</file>
+        <file>images/icons/api.svg</file>
+        <file>images/icons/appearance.svg</file>
+        <file>images/icons/error.svg</file>
+        <file>images/icons/file.svg</file>
+        <file>images/icons/information.svg</file>
+        <file>images/icons/network.svg</file>
+        <file>images/icons/preferences.svg</file>
+        <file>images/icons/question.svg</file>
+        <file>images/icons/warning.svg</file>
+    </qresource>
+</RCC>

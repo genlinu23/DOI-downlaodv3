@@ -1,0 +1,110 @@
+name: Build latest version
+on: [push]
+jobs:
+  build-macos-arm64:
+    runs-on: macos-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Setup python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Build and package
+        run: |
+          chmod +x ./building/build_macos.sh
+          ./building/build_macos.sh arm64
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: SciHubEVA-macOS-arm64-latest
+          path: dist-macOS-arm64/SciHubEVA-arm64-latest.dmg
+
+  build-macos-x86_64:
+    runs-on: macos-15-intel
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Setup python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Build and package
+        run: |
+          chmod +x ./building/build_macos.sh
+          ./building/build_macos.sh x86_64
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: SciHubEVA-macOS-x86_64-latest
+          path: dist-macOS-x86_64/SciHubEVA-x86_64-latest.dmg
+
+  build-windows-x86_64:
+    runs-on: windows-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Setup python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Build and package
+        run: ./building/build_windows.ps1 x86_64
+        shell: powershell
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: SciHubEVA-Windows-x86_64-latest
+          path: dist-Windows-x86_64/SciHubEVA-x86_64-latest.exe
+
+  build-linux-x86_64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Setup python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install system packages
+        run: |
+          sudo apt update
+          sudo apt install -y binutils curl librsvg2-bin libfuse2 libgl1-mesa-dev libxcb* libxau-dev liblzma-dev libegl-dev
+
+      - name: Install appimagetool
+        run: |
+          mkdir -p $HOME/.local/bin
+          curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o $HOME/.local/bin/appimagetool-x86_64.AppImage
+          chmod +x $HOME/.local/bin/appimagetool-x86_64.AppImage
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Build and package
+        run: |
+          chmod +x ./building/build_linux.sh
+          ./building/build_linux.sh x86_64
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: SciHubEVA-Linux-x86_64-latest
+          path: dist-Linux-x86_64/SciHubEVA-x86_64-latest.AppImage

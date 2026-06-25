@@ -1,0 +1,33 @@
+# Idea
+.idea
+
+# VS Code
+.vscode
+
+# Qt
+build-*
+*.pro.user
+*.qm
+*.qmlc
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.hypothesis
+.pytest_cache
+.venv
+scihub_eva/resources.py
+
+# Others
+*.spec
+build-*/**
+confs/qtquickcontrols2.conf
+design/**
+!design/*.psd
+!design/*.svg
+dist-*/**
+i18n/*_zh_HK.ts
+i18n/*_zh_TW.ts
+*.bak
+design/

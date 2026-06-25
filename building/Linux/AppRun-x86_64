@@ -1,0 +1,5 @@
+#!/bin/bash
+
+APP_DIR=$(dirname $0)
+
+${APP_DIR}/SciHubEVA
