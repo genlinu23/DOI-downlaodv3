@@ -34,6 +34,15 @@ ApplicationWindow {
     signal systemOpenDownloadLog()
     signal exportFailedQueries(string path)
     signal rampage(string query)
+    signal pauseRampage()
+    signal resumeRampage()
+
+    property bool isRampaging: false
+    property bool isPaused: false
+
+    function setPaused(paused) {
+        isPaused = paused
+    }
 
     function setSaveToDir(directory) {
         textFieldSaveToDir.text = directory
@@ -51,12 +60,16 @@ ApplicationWindow {
         progressBarTotal.value = 0
         labelProgress.text = "0 / 0   ✓ 0   ✗ 0"
         listModelTasks.clear()
+        isRampaging = true
+        isPaused = false
     }
 
     function afterRampage() {
         buttonRampage.enabled = true
         buttonLoadInputQueryList.enabled = true
         buttonOpenSaveToDir.enabled = true
+        isRampaging = false
+        isPaused = false
     }
 
     function updateProgress(completed, total, successCount, failedCount) {
@@ -312,6 +325,19 @@ ApplicationWindow {
                 id: labelProgress
                 text: "0 / 0   ✓ 0   ✗ 0"
                 Layout.minimumWidth: 160
+            }
+
+            Button {
+                id: buttonPause
+                text: isPaused ? qsTr("Resume") : qsTr("Pause")
+                visible: isRampaging
+                enabled: isRampaging
+                flat: true
+
+                onClicked: {
+                    if (isPaused) resumeRampage()
+                    else pauseRampage()
+                }
             }
         }
 

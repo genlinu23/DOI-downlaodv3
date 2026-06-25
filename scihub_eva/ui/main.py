@@ -49,6 +49,7 @@ class UISciHubEVA(QObject):
     after_rampage = Signal()
     update_progress = Signal(int, int, int, int)   # completed, total, success, failed
     update_task_row = Signal(str, str, str, str)    # doi, mirror, speed, status
+    set_paused = Signal(bool)
 
     # Internal signal to route worker-thread callbacks back to the main thread
     _rampage_done = Signal(str, object, object)
@@ -80,6 +81,7 @@ class UISciHubEVA(QObject):
         self._success_count = 0
         self._failed_count = 0
         self._completed_count = 0
+        self._is_paused = False
 
         # Parallel download: list of active SciHubAPI threads (main-thread only)
         self._active_apis: list[SciHubAPI] = []
@@ -106,6 +108,8 @@ class UISciHubEVA(QObject):
         self.window.systemOpenDownloadLog.connect(self.system_open_download_log)  # type: ignore
         self.window.exportFailedQueries.connect(self.export_failed_queries)  # type: ignore
         self.window.rampage.connect(self.rampage)  # type: ignore
+        self.window.pauseRampage.connect(self.pause_rampage)  # type: ignore
+        self.window.resumeRampage.connect(self.resume_rampage)  # type: ignore
 
         self.set_save_to_dir.connect(self.window.setSaveToDir)  # type: ignore
         self.append_log.connect(self.window.appendLog)  # type: ignore
@@ -113,6 +117,7 @@ class UISciHubEVA(QObject):
         self.after_rampage.connect(self.window.afterRampage)  # type: ignore
         self.update_progress.connect(self.window.updateProgress)  # type: ignore
         self.update_task_row.connect(self.window.updateTaskRow)  # type: ignore
+        self.set_paused.connect(self.window.setPaused)  # type: ignore
 
         self._rampage_done.connect(self._on_rampage_done)  # type: ignore
 
@@ -143,6 +148,21 @@ class UISciHubEVA(QObject):
     @Slot()
     def system_open_download_log(self) -> None:
         open_file(DOWNLOAD_LOG_FILE)
+
+    @Slot()
+    def pause_rampage(self) -> None:
+        self._is_paused = True
+        self.set_paused.emit(True)
+        self._logger.info(
+            self.tr('Paused. {} queries remaining.').format(len(self._query_list))
+        )
+
+    @Slot()
+    def resume_rampage(self) -> None:
+        self._is_paused = False
+        self.set_paused.emit(False)
+        self._logger.info(self.tr('Resumed.'))
+        self.rampage_query_list()
 
     @Slot(str)
     def export_failed_queries(self, path: str) -> None:
@@ -213,6 +233,9 @@ class UISciHubEVA(QObject):
 
     def rampage_query_list(self) -> None:
         """Fill all available concurrency slots from the queue."""
+        if self._is_paused:
+            return
+
         scihub_urls = Preferences.get_or_default(
             API_SCIHUB_URLS_KEY, API_SCIHUB_URLS_DEFAULT, value_type=list
         )
